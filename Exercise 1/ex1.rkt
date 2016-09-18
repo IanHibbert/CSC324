@@ -112,10 +112,13 @@ Hint: you may find the "apply" function helpful.
 
 #|use apply, max, cons new list only if adding the next number increases max |#
 
-(define a '(-1 10 -4 5 3 -100 6))
-
 (define (max-sublist lst)
-  (cond [(empty? lst) '()]
-        
-        [else 1]
-        ))
+  (best-sub lst 0 0)
+  )
+
+(define (best-sub lst best current)
+  (cond [(empty? lst) best]
+        [(best-sub (rest lst)
+                   (max best (+ current (first lst)))
+                   (max 0 (+ current (first lst))))]
+  ))
