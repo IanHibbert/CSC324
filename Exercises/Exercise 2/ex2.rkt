@@ -34,8 +34,20 @@ Try using higher-order list functions when you can.
 > (cartesian-product '((1 4) (2 10)) '((3 4 5) (2)))
 '((1 4 3 4 5) (1 4 2) (2 10 3 4 5) (2 10 2))
 |#
-(define cartesian-product (void))
-
+(define (cartesian-product table1 table2)
+  ;    (if (or (empty? table1) (empty? table2))
+  ;        '()
+  ;        (map (λ (x)
+  ;               (map
+  ;                (λ (y) (append x y))
+  ;                table2))
+  ;             table1))
+  (if (or (empty? table1) (empty? table2))
+      '()
+      (append (map (λ (x)
+                     (append (first table1) x)) table2)
+              (cartesian-product (rest table1) table2))
+      ))
 
 #|
 (function-sort functions arg)
@@ -65,4 +77,6 @@ Hint:
 - the built-in sort is actually a higher-order function, with an optional
 function parameter #:key
 |#
-(define function-sort (void))
+(define (function-sort functions arg)
+  (sort functions < #:key (λ (f) (f arg)))
+  )
