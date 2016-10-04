@@ -37,8 +37,11 @@ Implement each of the following two macros.
 |#
 (define-syntax flipped-and
   (syntax-rules ()
-    
-    
+    [(flipped-and) #t]
+    [(flipped-and <arg1>)
+     (if <arg1> #t #f)]
+    [(flipped-and <arg1> <arg2> ...)
+     (flipped-and <arg2> ...)]
   ))
 
 #|
