@@ -4,7 +4,7 @@
 
 ; Comment out tests to avoid "bad syntax" errors when working
 ; on the assignment.
-#|
+
 ; Traits for testing
 (define (distance-trait obj)
   (lambda (msg)
@@ -26,7 +26,7 @@
 
 ; Tests for Question 2
 
-(class-trait Point (x y) (with distance-trait)
+(class-trait Point (x y) (with distance-trait distance-trait-2)
   [(distance other-point)
    (let ([dx (- x (other-point "x"))]
          [dy (- y (other-point "y"))])
@@ -101,4 +101,3 @@
 (test (let ([p (A-meta 1 2 3)])
         (map first (p "_methods")))
       '("black" "white"))
-|#

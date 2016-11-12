@@ -111,10 +111,10 @@ extending the functionality of the backtracking library.
 (define (sub-< lst)
   (cond [(empty? lst) '()]
         [(equal? "" (first lst)) (append (list (-< 1 2 3 4))
-                                         (sub-< (rest lst)))]
+                                        (sub-< (rest lst)))]
         [else (cons (first lst)
                     (sub-< (rest lst)))]))
-
+      
 
 (define (valid-grid grid)
   (define row1 (first grid))

@@ -17,7 +17,12 @@ Ian Hibbert, hibberti, 1000632871
 ; to the provide statement.
 (provide attributes
          tuples
-         size)
+         size
+         SELECT
+         replace
+         name-tables
+         where
+         order)
 
 ; Part 0: Semantic aliases
 
@@ -171,10 +176,9 @@ attributes present in all lists
 (define (duplicates? attr-lst)
   (if (empty? (rest attr-lst))
       '()
-      (remove-duplicates
-       (append
-        (dup-helper (first attr-lst) (second attr-lst))
-        (duplicates? (rest attr-lst))))))
+       (remove-duplicates (flatten (append
+        (map (lambda (attrs) (dup-helper  (first attr-lst) attrs)) (rest attr-lst))
+        (duplicates? (rest attr-lst)))))))
 
 
 #|
@@ -219,7 +223,7 @@ and returns a list of attributes renamed with the corresponding name
       (if (empty? attr-lst)
           '()
           (append (rename-attr-list (first attr-lst) dup-lst (first name-lst))
-                (rename-helper (rest name-lst) (rest attr-lst)))
+                  (rename-helper (rest name-lst) (rest attr-lst)))
           ))
     (rename-helper name-lst attr-lst)))
 
@@ -246,7 +250,7 @@ and returns the cartesian product and renamed attributes
   (define table-attrs (map first (map rest table)))
   (define table-tuples (map rest (map rest table)))
   (define table-names (map first table))
-
+  
   (cons (rename-attrs table-names table-attrs)
         (multi-join table-tuples))
   )
@@ -290,8 +294,9 @@ A function that takes:
    sorts the tuples in descending order according to the attribute
    and returns the ordered table
 |#
-(define (order-table table attr)
-  (sort (tuples table) > #:key attr))
+(define (order-table attr table)
+  (cons (attributes table)
+        (sort (tuples table) > #:key attr)))
 
 
 ; Starter for Part 3; feel free to ignore!
@@ -301,8 +306,12 @@ A function that takes:
   (syntax-rules ()
     ; The recursive step, when given a compound expression
     [(replace (expr ...) table)
-     ; Change this!
-     (void)]
+     (lambda (tuple)
+       (if (empty? tuple)
+           tuple
+           (let ([sub-expr (list ((replace expr table) tuple)
+                              ...)])
+             (apply (first sub-expr) (rest sub-expr)))))]
     ; The base case, when given just an atom. This is easier!
     [(replace atom table)
      ; Change this!
@@ -330,9 +339,37 @@ A function that takes:
                    <table>)]
     ))
 
+;ORDER BY Syntax
+(define-syntax order
+  (syntax-rules ()
+    [(order <cond> <table>)
+     (order-table (replace <cond> (attributes <table>))
+                  <table>)]))
+
 ;SELECT Syntax
 (define-syntax SELECT
   (syntax-rules (* FROM WHERE ORDER BY)
+    
+    ;* -> FROM <table> WHERE <cond> ORDER BY <order>
+    [(SELECT <attrs> FROM <table> ... WHERE <cond> ORDER BY <order>)
+     (SELECT <attrs> FROM
+             (order <order>
+                    (where <cond>
+                           (SELECT * FROM <table> ...))))]
+    
+    
+    ;* -> FROM <table> ORDER BY <cond>
+    [(SELECT <attrs> FROM <table> ... ORDER BY <cond>)
+     (SELECT <attrs> FROM
+             (order <cond>
+                    (SELECT * FROM <table> ...)))]
+
+
+    ;* -> FROM <table> WHERE <cond>
+    [(SELECT <attrs> FROM <table> ... WHERE <cond>)
+     (SELECT <attrs> FROM (where <cond>
+                           (SELECT * FROM <table> ...)))]
+    
     ;* -> FROM
     [(SELECT * FROM <table>)
      <table>]
@@ -342,20 +379,13 @@ A function that takes:
      (select-table <attr> <table>)]
     
     ;* -> FROM Multiple Tables
-    [(SELECT * FROM <table> ...)
-     (multi-select (name-tables <table> ...))]
-        
-    ;<attr> -> FROM Multiple Tables
-    [(SELECT <attr> FROM <table> ...)
-     (select-table <attr> (multi-select (name-tables <table> ...)))]
-
-    ;* -> FROM <table> WHERE <cond>
-    [(SELECT * FROM <table> WHERE <cond>)
-     (SELECT * FROM (where <cond> <table>))]
+    [(SELECT * FROM <table1> <table2> ...)
+     (multi-select (name-tables <table1> <table2> ...))]
     
-    ;<attr> -> FROM
-    [(SELECT <attr> FROM <table>)
-     (select-table <attr> <table>)]))
+    ;<attr> -> FROM Multiple Tables
+    [(SELECT <attr> FROM <table1> <table2> ...)
+     (select-table <attr> (multi-select (name-tables <table1> <table2> ...)))]
+    ))
 
 
 
@@ -385,8 +415,7 @@ A function that takes:
 (define t-attrs (attributes Teaching))
 (define t-tuples (tuples Teaching))
 
-(define table (name-tables [Person "P"] [Teaching "T"]))
+(define table (name-tables [Person "P"] [Teaching "T"] [Person "P1"]))
 (define table-attrs (map first (map rest table)))
 (define table-tuples (map rest (map rest table)))
 (define table-names (map first table))
-

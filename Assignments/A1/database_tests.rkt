@@ -1,7 +1,7 @@
 #| Assignment 1 - Racket Query Language Tests (due Oct 14, 11:50pm)
 
 ***Write the names, CDF accounts and student id for each of your group members below.***
-<Name>, <CDF>, <ID>
+Ian Hibbert, hibberti, 1000632871
 <Name>, <CDF>, <ID>
 |#
 
@@ -33,6 +33,12 @@
     ("David" "CSC343")
     ))
 
+(define Empty-Tuples
+  '(("Name" "Age" "LikesBeer")))
+
+(define Empty-Table
+  '(()))
+
 
 #|
 All tests go below. 
@@ -55,6 +61,18 @@ and your TAs will appreciate it!
         ("David" 20 #t) 
         ("Jen" 30 #t) 
         ("Paul" 100 #f)))
+
+;Select all Empty-Tuples
+(test (SELECT * FROM Empty-Tuples)
+      '(("Name" "Age" "LikesBeer")))
+
+;Select all Empty Table
+(test (SELECT * FROM Empty-Table)
+      '(()))
+
+;Select attributes from empty table
+(test (SELECT '("Age" "LikesBeer") FROM Empty-Table)
+      '(("Age" "LikesBeer")))
 
 ; Reordering columns
 (test (SELECT '("Age" "LikesChocolate" "Name") FROM Person)
@@ -81,6 +99,10 @@ and your TAs will appreciate it!
    ("Hi" 5)
    ("Bye" 5)
    ("Hi" 10)))
+
+;Select all from product of two empty tables
+(test (SELECT * FROM [Empty-Table "T1"] [Empty-Table "T2"])
+      '(()))
 
 ; Select all from two product of two tables
 (test (SELECT * FROM [Person "P"] [Teaching "T"])

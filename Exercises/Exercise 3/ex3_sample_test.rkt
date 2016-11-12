@@ -15,7 +15,7 @@ Please make sure to test your code thoroughly before submitting!
 #lang plai
 (abridged-test-output #t)
 
-(require "ex5.rkt")
+(require "ex3.rkt")
 
 ; Tests for flipped-and
 (test (flipped-and)
