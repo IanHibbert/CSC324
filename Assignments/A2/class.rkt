@@ -9,46 +9,53 @@ class macro to include support for traits and some basic introspection.
 ; QUESTION 1 (metaprogramming).
 (define-syntax class-meta
   (syntax-rules ()
-    [(class <Class> (<attr> ...)
-       [(method <param> ...) <body>] ...)
+    [(class-meta <Class> (<attr> ...)
+                 [(method <param> ...) <body>] ...)
      
      (define (<Class> <attr> ...)
        (lambda (msg)
          (cond [(equal? msg (id->string <attr>)) <attr>]
                ...
                [(equal? "_attributes" msg)
-                (map (lambda (id val)
-                       (cons id (list val)))
-                     (list (id->string <attr>) ...)
-                     (list <attr> ...))]
+                (sort (map (lambda (id val)
+                             (cons id (list val)))
+                           (list (id->string <attr>) ...)
+                           (list <attr> ...))
+                      #:key car string<?)]
                
                [(equal? "_methods" msg)
-                (map (lambda (id val)
-                       (cons id (list val)))
-                     (list (id->string method ...))
-                     (list (lambda (<param> ...) <body>))...)]
+                (sort (map (lambda (id val)
+                             (cons id (list val)))
+                           (list (id->string method) ...)
+                           (list (lambda (<param> ...) <body>)...))
+                      #:key car string<?)]
                
                [else "Unrecognizable Message"]
                )))]))
-
-(class-meta Point-meta (x y)
-            [(distance other-point)
-             (let ([dx (- x (other-point "x"))]
-                   [dy (- y (other-point "y"))])
-               (sqrt (+ (* dx dx) (* dy dy))))])
-
-(let ([p (Point-meta 2 3)])
-  (p "_attributes"))
-
-(let ([p (Point-meta 2 3)])
-  (p "_methods"))
 
 
 ; QUESTION 2 (traits).
 (define-syntax class-trait
   (syntax-rules ()
-    
-    ))
+    [(class-trait <Class> (<attr> ...) (with <trait> ...)
+                  [(<method> <param> ...) <body>] ...)
+     (define (<Class> <attr> ...)
+       (let ([obj (lambda (msg)
+                    (cond [(equal? msg (id->string <attr>)) <attr>]
+                          ...
+                          [(equal? msg (id->string <method>))
+                           (lambda (<param> ...) <body>)]
+                          ...
+                          [else "Unrecognized message!"]))])
+         ((compose <trait> ...) obj)
+         ))
+     
+     ]))
+
+
+
+
+
 
 ; -----------------------------------------------------------------------------
 ; Class macro. This section is just for your reference.
