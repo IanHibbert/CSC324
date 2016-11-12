@@ -45,7 +45,36 @@ extending the functionality of the backtracking library.
 > (next)
 "false."
 |#
-(define subsets (void))
+(define (subsets lst)
+  (parse (subset lst)))
+
+(define (add-to-all lst item)
+  (if (null? lst)
+      empty
+      (cons (cons item (car lst))
+            (add-to-all (cdr lst) item))))
+; subsets
+
+(define (subset lst)
+  (if (empty? lst)
+      '(())
+      (let ((rst (subset (cdr lst))))
+        (append (add-to-all rst (car lst))
+                rst))))
+
+(define (parse lst)
+  (if (empty? (rest lst))
+      (first lst)
+      (-< (first lst)
+          (parse (rest lst)))))
+
+
+(define (insert lst val)
+  (if (empty? lst)
+      '()
+      (-< (cons val lst)
+          (cons (first lst)
+                (insert (rest lst) val)))))
 
 
 ; QUESTION 4
@@ -61,8 +90,69 @@ extending the functionality of the backtracking library.
   is just to correctly express the constraints, and let the computer
   do the work.
 |#
-(define sudoku-4 (void))
+(define grid '((1 2 3 4)
+               (3 4 1 2)
+               (4 1 2 3)
+               (2 3 4 1)))
+(define grid1
+  '((1 2 3 4)
+    ("" "" 1 "")
+    ("" "" 2 3)
+    (2 "" "" 1)))
 
+(define (sudoku-4 grid)
+  (?- valid-grid (list (sub-< (first grid))
+                       (sub-< (second grid))
+                       (sub-< (third grid))
+                       (sub-< (fourth grid))
+                       )))
+
+
+(define (sub-< lst)
+  (cond [(empty? lst) '()]
+        [(equal? "" (first lst)) (append (list (-< 1 2 3 4))
+                                        (sub-< (rest lst)))]
+        [else (cons (first lst)
+                    (sub-< (rest lst)))]))
+      
+
+(define (valid-grid grid)
+  (define row1 (first grid))
+  (define row2 (second grid))
+  (define row3 (third grid))
+  (define row4 (fourth grid))
+  
+  (define col1 (map (lambda (row) (first row)) grid))
+  (define col2 (map (lambda (row) (second row)) grid))
+  (define col3 (map (lambda (row) (third row)) grid))
+  (define col4 (map (lambda (row) (fourth row)) grid))
+  
+  (define q1 (list (first row1) (second row1) (first row2) (second row2)))
+  (define q2 (list (third row1) (fourth row1) (third row2) (fourth row2)))
+  (define q3 (list (first row3) (second row3) (first row4) (second row4)))
+  (define q4 (list (third row3) (fourth row3) (third row4) (fourth row4)))
+  
+  (and (valid-entry row1)
+       (valid-entry row2)
+       (valid-entry row3)
+       (valid-entry row4)
+       (valid-entry col1)
+       (valid-entry col2)
+       (valid-entry col3)
+       (valid-entry col4)
+       (valid-entry q1)
+       (valid-entry q2)
+       (valid-entry q3)
+       (valid-entry q4)
+       )
+  
+  )
+
+(define (valid-entry lst)
+  (equal? (set 1 2 3 4) (list->set lst))
+  )
+
+(sudoku-4 grid)
 
 ; QUESTION 5
 #|
