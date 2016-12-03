@@ -16,7 +16,7 @@ type AList a b = [(a, b)]
 
 -- | Returns the value in the association list corresponding to the given key.
 --   Assumes that the key is in the association list.
--- lookupA :: Eq a => AList a b -> a -> b
+lookupA :: Eq a => AList a b -> a -> b
 lookupA alist key =  if (fst (head alist) == key)
                       then (snd (head alist))
                       else
