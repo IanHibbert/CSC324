@@ -13,7 +13,8 @@ module Mutation (
     alloc, find_space,
     free,
     (>>>), (>~>),
-    returnVal, runOp)
+    returnVal, runOp,
+    (@@), isStudent, age, Person(..), personTest)
     where
 
 import AList (AList, lookupA, insertA, updateA, deleteA)
