@@ -4,12 +4,10 @@ import Test.HUnit
 import Mutation (
     Memory, Pointer(..), Value(..),
     Mutable, get, StateOp(..))
-
 import MutationUser (
+    pointerTest,
     swap,
-    -- pointerTest,
     swapCycle)
-
 import Data.List (sortBy, intersect, nub)
 
 -- helper to run a StateOp
@@ -61,25 +59,25 @@ swapTests = TestList [
         sortMem (run (swapCycle [p1]) testMem)
     ]
 
--- pointerTestTests :: Test
--- pointerTestTests =
---     let ((p1, p2), newMem) = run (pointerTest 3) testMem
---     in
---         TestList [
---             6 ~=? fst (run (get p1) newMem),
---             True ~=? fst (run (get p2) newMem),
---             testMem ++ [(100, IntVal 6), (500, BoolVal True)] ~=?
---                 sortMem2 newMem
---             ]
+pointerTestTests :: Test
+pointerTestTests =
+    let ((p1, p2), newMem) = run (pointerTest 3) testMem
+    in
+        TestList [
+            6 ~=? fst (run (get p1) newMem),
+            True ~=? fst (run (get p2) newMem),
+            testMem ++ [(100, IntVal 6), (500, BoolVal True)] ~=?
+                sortMem2 newMem
+            ]
 
 
 main :: IO ()
 main = do
     printCount "swapTests" swapTests
-    --printCount "pointerTestTests" pointerTestTests
+    printCount "pointerTestTests" pointerTestTests
     -- Uncomment these to see more detailed test results.
     -- (Format's a little ugly, though.)
-    --runTestTT swapTests
+    runTestTT swapTests
     --runTestTT pointerTestTests
     putStrLn "Tests Done!"
 

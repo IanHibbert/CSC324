@@ -9,10 +9,14 @@ module Mutation (
     Mutable, get, set, def,
     Memory, Pointer(..), findKey,
     Value(..),
-    StateOp(..))
+    StateOp(..),
+    alloc, find_space,
+    free,
+    (>>>), (>~>),
+    returnVal, runOp)
     where
 
-import AList (AList, lookupA, insertA, updateA)
+import AList (AList, lookupA, insertA, updateA, deleteA)
 
 -- A type representing the possible values stored in memory.
 data Value = IntVal Integer |
@@ -62,6 +66,25 @@ returnVal a = StateOp(\mem ->
 
 -- Allocate
 alloc :: Mutable a => a -> StateOp (Pointer a)
+alloc val = StateOp(\mem ->
+                    runOp (def (find_space mem 0) val) mem)
+
+find_space :: Memory -> Integer -> Integer
+find_space mem acc = if (findKey mem acc)
+                      then
+                        find_space mem (acc + 1)
+                      else
+                        acc
+
+
+free :: Mutable a => Pointer a -> StateOp ()
+free (P a) = StateOp (\mem ->
+                    if (findKey mem a)
+                      then
+                        ((), deleteA mem a)
+                      else
+                        ((), mem)
+                  )
 
 
 -- Type class representing a type which can be stored in "Memory".

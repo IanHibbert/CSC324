@@ -7,7 +7,8 @@ module AList (
     AList,
     lookupA,
     insertA,
-    updateA
+    updateA,
+    deleteA
     )
     where
 
@@ -51,3 +52,6 @@ updateA alist (key, val) = foldl (\new_lst lst ->
                                   )
                                   []
                                   alist
+
+deleteA :: Eq a => AList a b -> a -> AList a b
+deleteA mem ptr = filter (\a -> (fst a) /= ptr ) mem

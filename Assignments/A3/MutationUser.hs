@@ -3,16 +3,11 @@
 This file contains code which uses the mutation library found in Mutation.hs
 -}
 
-module MutationUser (
-    swap,
-    -- pointerTest,
-    swapCycle)
-
-    where
+module MutationUser(pointerTest, swap, swapCycle) where
 
 import Mutation (
     get, set, def, returnVal, (>~>), (>>>),
-    Mutable, Pointer, Memory, StateOp(..)
+    Mutable, Pointer, Memory, StateOp(..), returnVal, runOp
     )
 
 
@@ -26,22 +21,13 @@ swap p1 p2 = (get p1) >~>
               returnVal ()
 
 swapCycle :: Mutable a => [Pointer a] -> StateOp ()
-swapCycle [] = returnVal ()
-swapCycle (x:[]) = returnVal()
-swapCycle (x:xs:rest) = swap x xs >>> swapCycle(xs:rest)
-  -- let last_ptr = head lst
-  --                   alt_lst = (drop 1 lst) ++ [last_ptr]
-  --              in
-  --              zip swap lst alt_lst
-
-
--- swap p1 p2 = StateOp ((),
---                       let (x, mem1) = runOp (get p1)
---                           (y, mem2) = runOp (get p2)
---                           in
---                           runOp (set p1) y
---                           runOp (set p2) x)
-
+-- swapCycle [] = returnVal ()
+-- swapCycle (x:[]) = returnVal()
+-- swapCycle (x:y:rest) = swap x y >>> swapCycle(y:rest)
+swapCycle lst = case lst of
+                [] -> returnVal()
+                [x] -> returnVal()
+                (x:xs:rest) -> swap x xs >>> swapCycle(xs:rest)
 
 -- | Takes a number <n> and memory, and stores two new values in memory:
 --   - the integer (n + 3) at location 100
@@ -49,9 +35,14 @@ swapCycle (x:xs:rest) = swap x xs >>> swapCycle(xs:rest)
 --   Return the pointer to each stored value, and the new memory.
 --   You may assume these locations are not already used by the memory.
 -- pointerTest :: Integer -> Memory -> ((Pointer Integer, Pointer Bool), Memory)
--- pointerTest n mem = let int = (n + 3)
---                         boo = (n > 0)
---                     in
---                     let m1 = (def mem 100 int)
---                     in
---                     (def m1 500 boo)
+-- pointerTest n mem = let (a, mem1) = runOp (def 100 (n + 3)) mem
+--                         (x, y) = runOp (def 500 (n > 0)) mem1
+--                         in
+--                         ((a, x), y)
+
+pointerTest :: Integer -> StateOp (Pointer Integer, Pointer Bool)
+pointerTest n  = StateOp (\mem ->
+                          let (a, mem1) = runOp (def 100 (n + 3)) mem
+                              (x, y) = runOp (def 500 (n > 0)) mem1
+                              in
+                              ((a, x), y))
